@@ -23,6 +23,7 @@
 									<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal Permintaan</th>
 									<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Pembayaran</th>
 									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
+									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Produk</th>
 									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment</th>
 									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
 
@@ -31,6 +32,7 @@
 							<tbody>
 								<?php
 								foreach ($permintaan as $key => $value) {
+									$dt_produk = $this->db->query("SELECT * FROM `permintaan` JOIN detail_permintaan ON permintaan.id_permintaan=detail_permintaan.id_permintaan JOIN produk ON produk.id_produk=detail_permintaan.id_produk WHERE permintaan.id_permintaan='" . $value->id_permintaan . "'")->result();
 								?>
 									<tr>
 										<td>
@@ -47,17 +49,28 @@
 										</td>
 										<td>
 											<p class="text-xs font-weight-bold mb-0 text-center"><?php if ($value->status == '0') {
-																										echo '<span class="badge bg-warning">Permintaan Diterima Supplier</span>';
+																										echo '<span class="badge bg-danger">Menunggu Konfirmasi Pemilik</span>';
 																									} else if ($value->status == '1') {
-																										echo '<span class="badge bg-info">Berhasil Dikonfirmasi</span>';
+																										echo '<span class="badge bg-info">Berhasil Dikonfirmasi Pemilik</span>';
 																									} else if ($value->status == '2') {
 																										echo '<span class="badge bg-success">Pesanan Selesai</span>';
 																									} ?></p>
 										</td>
 										<td>
-											<p class="text-xs font-weight-bold mb-0 text-center"><?php if ($value->payment == '0') {
+											<?php
+											foreach ($dt_produk as $key => $a) {
+												echo '<p class="text-xs font-weight-bold mb-0 text-center">' . $a->nama_produk . ' x' . $a->qty . '</p>';
+											}
+											?>
 
-																									?>
+										</td>
+										<td>
+											<p class="text-xs font-weight-bold mb-0 text-center">
+												<?php
+												if ($value->payment == '0' && $value->status == 0) {
+													echo '<span class="badge bg-danger">Belum Bayar</span>';
+												} else if ($value->payment == '0' && $value->status != 0) {
+												?>
 													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
 														Upload Bukti Pembayaran
 													</button>
@@ -84,9 +97,9 @@
 												</div>
 											</div>
 										<?php
-																									} else {
-																										echo '<span class="badge bg-success">Berhasil Bayar</span>';
-																									} ?>
+												} else {
+													echo '<span class="badge bg-success">Berhasil Bayar</span>';
+												} ?>
 										</p>
 										</td>
 										<td class="align-middle text-center text-sm">

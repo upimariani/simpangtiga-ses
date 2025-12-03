@@ -3,8 +3,7 @@
 		<div class="col-12">
 			<div class="card mb-4">
 				<div class="card-header pb-0">
-					<h6>Informasi Produk</h6>
-					<a href="<?= base_url('Admin/cProduk/create') ?>" class="btn btn-primary">Tambah Data Produk</a>
+					<h6>Informasi Peramalan Produk</h6>
 					<?php
 					if ($this->session->userdata('success')) {
 					?>
@@ -51,8 +50,7 @@
 											<p class="text-xs font-weight-bold mb-0"><?= $value->stok ?> <?= $value->keterangan ?></p>
 										</td>
 										<td class="align-middle text-center text-sm">
-											<a href="<?= base_url('Admin/cProduk/edit/' . $value->id_produk) ?>" class="btn btn-warning btn-sm">Edit</a>
-											<a href="<?= base_url('Admin/cProduk/delete/' . $value->id_produk) ?>" class="btn btn-danger btn-sm">Hapus</a>
+											<a href="<?= base_url('Admin/cPeramalan/view_peramalan/' . $value->id_produk) ?>" class="btn btn-success btn-sm">View Peramalan</a>
 										</td>
 
 									</tr>

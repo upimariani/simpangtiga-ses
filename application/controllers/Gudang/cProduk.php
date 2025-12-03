@@ -16,10 +16,10 @@ class cProduk extends CI_Controller
 		$data = array(
 			'produk' => $this->mProduk->select()
 		);
-		$this->load->view('Admin/Layout/head');
-		$this->load->view('Admin/Layout/aside');
-		$this->load->view('Admin/Produk/vProduk', $data);
-		$this->load->view('Admin/Layout/footer');
+		$this->load->view('Gudang/Layout/head');
+		$this->load->view('Gudang/Layout/aside');
+		$this->load->view('Gudang/Produk/vProduk', $data);
+		$this->load->view('Gudang/Layout/footer');
 	}
 	public function create()
 	{
@@ -33,10 +33,10 @@ class cProduk extends CI_Controller
 			$data = array(
 				'supplier' => $this->mUser->select()
 			);
-			$this->load->view('Admin/Layout/head');
-			$this->load->view('Admin/Layout/aside');
-			$this->load->view('Admin/Produk/vTambahProduk', $data);
-			$this->load->view('Admin/Layout/footer');
+			$this->load->view('Gudang/Layout/head');
+			$this->load->view('Gudang/Layout/aside');
+			$this->load->view('Gudang/Produk/vTambahProduk', $data);
+			$this->load->view('Gudang/Layout/footer');
 		} else {
 			$config['upload_path']          = './asset/produk';
 			$config['allowed_types']        = 'gif|jpg|png|jpeg';
@@ -48,10 +48,10 @@ class cProduk extends CI_Controller
 				$data = array(
 					'supplier' => $this->mUser->select()
 				);
-				$this->load->view('Admin/Layout/head');
-				$this->load->view('Admin/Layout/aside');
-				$this->load->view('Admin/Produk/vTambahProduk', $data);
-				$this->load->view('Admin/Layout/footer');
+				$this->load->view('Gudang/Layout/head');
+				$this->load->view('Gudang/Layout/aside');
+				$this->load->view('Gudang/Produk/vTambahProduk', $data);
+				$this->load->view('Gudang/Layout/footer');
 			} else {
 				$upload_data = $this->upload->data();
 				$data = array(
@@ -64,7 +64,7 @@ class cProduk extends CI_Controller
 				);
 				$this->mProduk->create($data);
 				$this->session->set_flashdata('success', 'Data Produk Berhasil Ditambahkan!');
-				redirect('Admin/cProduk');
+				redirect('Gudang/cProduk');
 			}
 		}
 	}
