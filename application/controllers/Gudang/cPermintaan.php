@@ -14,7 +14,8 @@ class cPermintaan extends CI_Controller
 	public function index()
 	{
 		$data = array(
-			'permintaan' => $this->mPermintaan->select()
+			// 'permintaan' => $this->mPermintaan->select()
+			'permintaan' => $this->db->query("SELECT * FROM `permintaan` GROUP BY id_permintaan DESC")->result()
 		);
 		$this->load->view('Gudang/Layout/head');
 		$this->load->view('Gudang/Layout/aside');

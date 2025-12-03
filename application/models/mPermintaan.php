@@ -7,7 +7,8 @@ class mPermintaan extends CI_Model
 	{
 		$this->db->select('*');
 		$this->db->from('permintaan');
-		$this->db->order_by('id_permintaan', 'desc');
+		$this->db->order_by('tgl_permintaan', 'desc');
+
 		return $this->db->get()->result();
 	}
 }
