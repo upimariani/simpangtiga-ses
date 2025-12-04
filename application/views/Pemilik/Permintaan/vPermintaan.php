@@ -4,7 +4,7 @@
 			<div class="card mb-4">
 				<div class="card-header pb-0">
 					<h6>Informasi Permintaan Produk</h6>
-
+					<a class="btn btn-success" href="<?= base_url('Pemilik/cPermintaan/cetak_laporan') ?>">Cetak Laporan</a>
 					<?php
 					if ($this->session->userdata('success')) {
 					?>

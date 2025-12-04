@@ -27,6 +27,9 @@
 
 							//mengambil data bulan
 							$bulan = $this->db->query("SELECT MAX(bulan)+1 as bulan FROM `peramalan` WHERE id_produk='1' AND tahun='2025'")->row();
+							if ($bulan->bulan == '13') {
+								$next_bulan = 'Januari';
+							}
 							if ($bulan->bulan == '1') {
 								$next_bulan = 'Januari';
 							} else if ($bulan->bulan == '2') {
