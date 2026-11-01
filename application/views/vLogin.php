@@ -37,16 +37,20 @@
 </head>
 
 <body class="">
-
 	<main class="main-content">
 		<section>
-			<div class="page-header min-vh-75">
+			<div class="page-header">
 				<div class="container">
 					<div class="row">
 						<div class="col-xl-4 col-lg-5 col-md-6 d-flex flex-column mx-auto">
-							<div class="card card-plain mt-8">
+							<div class="card card-plain mt-6">
 								<div class="card-header pb-0 text-left bg-transparent">
-									<h3 class="font-weight-bolder text-info text-gradient">Simpang Tiga</h3>
+									<h3 class="font-weight-bolder" style="background: linear-gradient(90deg, #d63384 0%, #8e1b57 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;">
+										Simpang Tiga
+									</h3>
 									<p class="mb-0">Enter your username and password to sign in</p>
 								</div>
 
@@ -80,7 +84,9 @@
 										</div>
 
 										<div class="text-center">
-											<button type="submit" class="btn bg-gradient-info w-100 mt-4 mb-0">Sign in</button>
+											<button type="submit" class="btn w-100 mt-4 mb-0" style="background-color: #d63384; color: #ffffff; border-color: #d63384;">
+												Sign in
+											</button>
 										</div>
 									</form>
 								</div>
@@ -88,8 +94,9 @@
 							</div>
 						</div>
 						<div class="col-md-6">
-							<div class="oblique position-absolute top-0 h-100 d-md-block d-none me-n8">
-								<div class="oblique-image bg-cover position-absolute fixed-top ms-auto h-100 z-index-0 ms-n6" style="background-image:url('<?= base_url('asset/soft-ui-dashboard/') ?>assets/img/curved-images/curved6.jpg')"></div>
+							<div>
+								<img width="400px" class="mt-8" src="<?= base_url('asset/simpangtiga.png') ?>">
+
 							</div>
 						</div>
 					</div>

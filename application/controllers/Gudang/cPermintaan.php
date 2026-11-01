@@ -13,14 +13,42 @@ class cPermintaan extends CI_Controller
 
 	public function index()
 	{
-		$data = array(
-			// 'permintaan' => $this->mPermintaan->select()
-			'permintaan' => $this->db->query("SELECT * FROM `permintaan` GROUP BY id_permintaan DESC")->result()
-		);
+		$data['permintaan'] = $this->db
+			->order_by('id_permintaan', 'DESC')
+			->get('permintaan')
+			->result();
 		$this->load->view('Gudang/Layout/head');
 		$this->load->view('Gudang/Layout/aside');
 		$this->load->view('Gudang/Permintaan/vPermintaan', $data);
 		$this->load->view('Gudang/Layout/footer');
+	}
+	public function detail_permintaan($id_permintaan)
+	{
+		$data['permintaan'] = $this->db
+			->get_where('permintaan', [
+				'id_permintaan' => $id_permintaan
+			])->row();
+
+		if (!$data['permintaan']) {
+			show_404();
+			return;
+		}
+
+		$data['detail'] = $this->db
+			->select('detail_permintaan.*, produk.nama_produk, produk.harga')
+			->from('detail_permintaan')
+			->join(
+				'produk',
+				'produk.id_produk = detail_permintaan.id_produk'
+			)
+			->where('detail_permintaan.id_permintaan', $id_permintaan)
+			->get()
+			->result();
+
+		// $this->load->view('Gudang/Layout/head');
+		// $this->load->view('Gudang/Layout/aside');
+		$this->load->view('Gudang/Permintaan/vDetailPermintaan', $data);
+		// $this->load->view('Gudang/Layout/footer');
 	}
 	public function tambah_permintaan()
 	{
@@ -97,7 +125,8 @@ class cPermintaan extends CI_Controller
 		} else {
 			$upload_data = $this->upload->data();
 			$data = array(
-				'payment' => $upload_data['file_name']
+				'payment' => $upload_data['file_name'],
+				'status' => '2'
 			);
 			$this->db->where('id_permintaan', $id_permintaan);
 			$this->db->update('permintaan', $data);

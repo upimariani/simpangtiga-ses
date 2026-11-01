@@ -19,12 +19,7 @@
 					<li class="nav-item">
 						<a href="<?= base_url('Admin/cUser') ?>" class="nav-link text-muted" target="_blank">User</a>
 					</li>
-					<li class="nav-item">
-						<a href="<?= base_url('Admin/cProduk') ?>" class="nav-link text-muted" target="_blank">Produk</a>
-					</li>
-					<li class="nav-item">
-						<a href="<?= base_url('Admin/cPeramalan') ?>" class="nav-link pe-0 text-muted" target="_blank">Peramalan</a>
-					</li>
+
 				</ul>
 			</div>
 		</div>
@@ -39,6 +34,155 @@
 <script src="<?= base_url('asset/soft-ui-dashboard/') ?>assets/js/core/bootstrap.min.js"></script>
 <script src="<?= base_url('asset/soft-ui-dashboard/') ?>assets/js/plugins/perfect-scrollbar.min.js"></script>
 <script src="<?= base_url('asset/soft-ui-dashboard/') ?>assets/js/plugins/smooth-scrollbar.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+
+		const selectProduk = document.getElementById('pilihProduk');
+		const canvas = document.getElementById('grafikPermintaan');
+		const pesanGrafik = document.getElementById('pesanGrafik');
+		const nilaiMape = document.getElementById('nilai_mape');
+
+		let grafik = null;
+
+		async function tampilkanGrafik(idProduk) {
+
+			if (grafik) {
+				grafik.destroy();
+				grafik = null;
+			}
+
+			nilaiMape.textContent = '-';
+
+			if (!idProduk) {
+				pesanGrafik.textContent = 'Silakan pilih produk.';
+				return;
+			}
+
+			pesanGrafik.textContent = 'Memuat data grafik...';
+
+			try {
+				const url = '<?= site_url("Gudang/cDashboard/data_grafik"); ?>' +
+					'?id_produk=' + encodeURIComponent(idProduk);
+
+				const response = await fetch(url);
+
+				if (!response.ok) {
+					throw new Error('HTTP ' + response.status);
+				}
+
+				const data = await response.json();
+
+				console.log('Respons grafik:', data);
+
+				if (!data.labels || data.labels.length === 0) {
+					pesanGrafik.textContent =
+						'Belum ada data peramalan untuk produk ini.';
+					return;
+				}
+
+				grafik = new Chart(canvas, {
+					type: 'line',
+
+					data: {
+						labels: data.labels,
+
+						datasets: [{
+								label: 'Permintaan Aktual',
+								data: data.aktual,
+								borderColor: '#d63384',
+								backgroundColor: 'rgba(214, 51, 132, 0.12)',
+								borderWidth: 2,
+								pointRadius: 4,
+								tension: 0.3
+							},
+							{
+								label: 'Hasil Peramalan SES',
+								data: data.peramalan,
+								borderColor: '#0d6efd',
+								backgroundColor: 'rgba(13, 110, 253, 0.12)',
+								borderWidth: 2,
+								pointRadius: 4,
+								tension: 0.3
+							}
+						]
+					},
+
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+
+						interaction: {
+							intersect: false,
+							mode: 'index'
+						},
+
+						plugins: {
+							legend: {
+								display: true,
+								position: 'top'
+							}
+						},
+
+						scales: {
+							y: {
+								beginAtZero: true,
+								title: {
+									display: true,
+									text: 'Jumlah Permintaan'
+								}
+							},
+
+							x: {
+								title: {
+									display: true,
+									text: 'Periode Bulan'
+								}
+							}
+						}
+					}
+				});
+
+				pesanGrafik.textContent = '';
+
+				nilaiMape.textContent =
+					data.mape !== null && data.mape !== undefined ?
+					Number(data.mape).toLocaleString('id-ID', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2
+					}) + '%' :
+					'Belum tersedia';
+
+			} catch (error) {
+				console.error('Gagal menampilkan grafik:', error);
+
+				pesanGrafik.textContent =
+					'Grafik gagal dimuat. Periksa Console browser dan controller.';
+			}
+		}
+
+		selectProduk.addEventListener('change', function() {
+			tampilkanGrafik(this.value);
+		});
+
+		// Otomatis pilih produk pertama jika tersedia
+		if (selectProduk.options.length > 1) {
+			selectProduk.selectedIndex = 1;
+			tampilkanGrafik(selectProduk.value);
+		}
+
+	});
+</script>
+<script>
+	var win = navigator.platform.indexOf('Win') > -1;
+	if (win && document.querySelector('#sidenav-scrollbar')) {
+		var options = {
+			damping: '0.5'
+		}
+		Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+	}
+</script>
 <script>
 	var win = navigator.platform.indexOf('Win') > -1;
 	if (win && document.querySelector('#sidenav-scrollbar')) {

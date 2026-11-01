@@ -50,7 +50,7 @@
 											<p class="text-xs font-weight-bold mb-0"><?= $value->stok ?> <?= $value->keterangan ?></p>
 										</td>
 										<td class="align-middle text-center text-sm">
-											<a href="<?= base_url('Admin/cPeramalan/view_peramalan/' . $value->id_produk) ?>" class="btn btn-success btn-sm">View Peramalan</a>
+											<a href="<?= base_url('Pemilik/cPeramalan/view_peramalan/' . $value->id_produk) ?>" class="btn btn-success btn-sm">View Peramalan</a>
 										</td>
 
 									</tr>

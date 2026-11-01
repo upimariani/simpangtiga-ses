@@ -2,121 +2,269 @@
 	<div class="row">
 		<div class="col-12">
 			<div class="card mb-4">
+
 				<div class="card-header pb-0">
 					<h6>Informasi Permintaan Produk</h6>
-					<a href="<?= base_url('Gudang/cPermintaan/tambah_permintaan') ?>" class="btn btn-primary">Tambah Data Permintaan Produk</a>
-					<?php
-					if ($this->session->userdata('success')) {
-					?>
-						<div class="alert alert-success" role="alert"><strong>Sukses!</strong>
-							<?= $this->session->userdata('success') ?>
+
+					<a href="<?= base_url('Gudang/cPermintaan/tambah_permintaan') ?>" class="btn btn-primary">
+						<i class="fas fa-plus me-1"></i>
+						Tambah Permintaan Produk
+					</a>
+
+					<?php if ($this->session->flashdata('success')) : ?>
+						<div class="alert alert-success">
+							<?= $this->session->flashdata('success') ?>
 						</div>
-					<?php
-					}
-					?>
+					<?php endif; ?>
+
+					<?php if ($this->session->flashdata('error')) : ?>
+						<div class="alert alert-danger">
+							<?= $this->session->flashdata('error') ?>
+						</div>
+					<?php endif; ?>
 				</div>
-				<div class="card-body px-0 pt-0 pb-2 m-3">
-					<div class="table-responsive p-0">
-						<table id="myTable" class="table align-items-center mb-0">
-							<thead>
-								<tr>
-									<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tanggal Permintaan</th>
-									<th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Total Pembayaran</th>
-									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status</th>
-									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Produk</th>
-									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Payment</th>
-									<th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php
-								foreach ($permintaan as $key => $value) {
-									$dt_produk = $this->db->query("SELECT * FROM `permintaan` JOIN detail_permintaan ON permintaan.id_permintaan=detail_permintaan.id_permintaan JOIN produk ON produk.id_produk=detail_permintaan.id_produk WHERE permintaan.id_permintaan='" . $value->id_permintaan . "'")->result();
-								?>
-									<tr>
-										<td>
-											<div class="d-flex px-2 py-1">
-												<div class="d-flex flex-column justify-content-center">
-													<h6 class="mb-0 text-sm"><?= $value->tgl_permintaan ?></h6>
-												</div>
-											</div>
-										</td>
-										<td>
-											<p class="text-xs font-weight-bold mb-0">Rp. <?= number_format($value->total_bayar)  ?></p>
-										</td>
-										<td>
-											<p class="text-xs font-weight-bold mb-0 text-center"><?php if ($value->status == '0') {
-																										echo '<span class="badge bg-danger">Menunggu Konfirmasi Pemilik</span>';
-																									} else if ($value->status == '1') {
-																										echo '<span class="badge bg-info">Berhasil Dikonfirmasi Pemilik</span>';
-																									} else if ($value->status == '2') {
-																										echo '<span class="badge bg-success">Pesanan Selesai</span>';
-																									} ?></p>
-										</td>
-										<td>
-											<?php
-											foreach ($dt_produk as $key => $a) {
-												echo '<p class="text-xs font-weight-bold mb-0 text-center">' . $a->nama_produk . ' x' . $a->qty . '</p>';
-											}
-											?>
-										</td>
-										<td>
-											<p class="text-xs font-weight-bold mb-0 text-center">
-												<?php
-												if ($value->payment == '0' && $value->status == 0) {
-													echo '<span class="badge bg-danger">Belum Bayar</span>';
-												} else if ($value->payment == '0' && $value->status != 0) {
-												?>
-													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-														Upload Bukti Pembayaran
-													</button>
-												<?php
-												} else {
-													echo '<span class="badge bg-success">Berhasil Bayar</span>';
-												} ?>
-											</p>
-										</td>
-										<td class="align-middle text-center text-sm">
-											<a href="<?= base_url('Gudang/cPermintaan/delete/' . $value->id_permintaan) ?>" class="btn btn-danger btn-sm">Hapus</a>
-										</td>
-									</tr>
-								<?php
-								}
-								?>
-							</tbody>
-						</table>
+
+
+				<?php
+				// Kelompok status permintaan
+				$tabStatus = [
+					'pemilik' => [
+						'judul' => 'Menunggu Konfirmasi Pemilik',
+						'status' => '0',
+						'payment' => null
+					],
+					'bayar' => [
+						'judul' => 'Upload Bukti Pembayaran',
+						'status' => '1',
+						'payment' => '0'
+					],
+					'supplier' => [
+						'judul' => 'Menunggu Konfirmasi Supplier',
+						'status' => '2',
+						'payment' => 'uploaded'
+					],
+					'selesai' => [
+						'judul' => 'Permintaan Selesai',
+						'status' => '3',
+						'payment' => 'uploaded'
+					]
+				];
+
+				// Kelompokkan data permintaan berdasarkan status
+				$dataTab = [];
+
+				foreach ($tabStatus as $key => $tab) {
+					$dataTab[$key] = [];
+
+					foreach ($permintaan as $p) {
+						$statusSesuai =
+							(string) $p->status === (string) $tab['status'];
+
+						$payment = trim((string) $p->payment);
+
+						if ($tab['payment'] === null) {
+							$paymentSesuai = true;
+						} elseif ($tab['payment'] === '0') {
+							$paymentSesuai = ($payment === '0');
+						} elseif ($tab['payment'] === 'uploaded') {
+							$paymentSesuai = ($payment !== '' && $payment !== '0');
+						} else {
+							$paymentSesuai =
+								($payment === (string) $tab['payment']);
+						}
+
+						if ($statusSesuai && $paymentSesuai) {
+							$dataTab[$key][] = $p;
+						}
+					}
+				}
+				?>
+
+
+				<div class="card-body">
+
+					<!-- Navigasi tab -->
+					<ul class="nav nav-tabs mb-3" id="tabPermintaan" role="tablist">
+
+						<?php $i = 0;
+						foreach ($tabStatus as $key => $tab) : ?>
+							<li class="nav-item" role="presentation">
+								<button class="text-sm nav-link <?= $i === 0 ? 'active' : '' ?>" id="tab-<?= $key ?>" data-bs-toggle="tab" data-bs-target="#konten-<?= $key ?>" type="button" role="tab">
+
+									<?= $tab['judul'] ?>
+
+									<span class="badge bg-secondary ms-1">
+										<?= count($dataTab[$key]) ?>
+									</span>
+								</button>
+							</li>
+						<?php $i++;
+						endforeach; ?>
+
+					</ul>
+
+					<div class="tab-content" id="kontenTabPermintaan">
+
+						<?php $i = 0;
+						foreach ($tabStatus as $key => $tab) : ?>
+
+							<div class="tab-pane fade <?= $i === 0 ? 'show active' : '' ?>" id="konten-<?= $key ?>" role="tabpanel">
+
+								<h6 class="mb-3">
+									<?= $tab['judul'] ?>
+								</h6>
+
+								<div class="table-responsive text-sm">
+									<table class="tbl table table-hover align-items-center mb-0">
+										<thead class="table-light">
+											<tr>
+												<th>No</th>
+												<th>Tanggal Permintaan</th>
+												<th>Total Pembayaran</th>
+												<th>Pembayaran</th>
+												<th class="text-center">Aksi</th>
+											</tr>
+										</thead>
+
+										<tbody>
+											<?php if (!empty($dataTab[$key])) : ?>
+
+												<?php $no = 1;
+												foreach ($dataTab[$key] as $value) : ?>
+													<tr>
+														<td><?= $no++ ?>.</td>
+
+														<td>
+															<?= html_escape($value->tgl_permintaan) ?>
+														</td>
+
+														<td>
+															Rp <?= number_format(
+																	$value->total_bayar,
+																	0,
+																	',',
+																	'.'
+																) ?>
+														</td>
+														<td class="text-center">
+
+															<?php if ($key === 'bayar') : ?>
+
+																<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalBayar<?= $value->id_permintaan ?>">
+																	Upload Bukti
+																</button>
+
+															<?php elseif ($key === 'supplier') : ?>
+
+																<span class="text-sm text-muted">
+																	Menunggu supplier
+																</span>
+
+															<?php elseif ($key === 'selesai') : ?>
+
+																<span class="text-sm text-success">
+																	Selesai
+																</span>
+
+															<?php else : ?>
+
+																<span class="text-sm text-muted">
+																	Menunggu pemilik
+																</span>
+
+															<?php endif; ?>
+														</td>
+														<td>
+
+															<?php if ($key !== 'selesai') : ?>
+																<a href="<?= base_url('Gudang/cPermintaan/delete/' . $value->id_permintaan) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus permintaan ini?')">
+																	Hapus
+																</a>
+															<?php endif; ?>
+															<a href="<?= base_url('Gudang/cPermintaan/detail_permintaan/' . $value->id_permintaan) ?>" class="btn btn-warning btn-sm">Detail</a>
+
+
+														</td>
+													</tr>
+
+												<?php endforeach; ?>
+
+
+
+											<?php endif; ?>
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+						<?php $i++;
+						endforeach; ?>
+
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<?php
-	foreach ($permintaan as $key => $value) {
-		if ($value->payment == '0') {
+</div>
 
-	?>
-			<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<?= form_open_multipart('Gudang/cPermintaan/bayar/' . $value->id_permintaan) ?>
-					<div class="modal-content">
-						<div class="modal-header">
-							<h6 class="modal-title" id="exampleModalLabel">Pembayaran Permintaan Produk <br> Sebesar <strong>Rp. <?= number_format($value->total_bayar) ?></strong></h6>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<div class="form-group">
-								<input class="form-control" type="file" name="gambar">
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="submit" class="btn btn-primary">Save changes</button>
-						</div>
-					</div>
-					</form>
+<!-- Modal upload bukti pembayaran -->
+<?php foreach ($dataTab['bayar'] as $value) : ?>
+
+	<div class="modal fade" id="modalBayar<?= $value->id_permintaan ?>" tabindex="-1" aria-hidden="true">
+
+		<div class="modal-dialog">
+			<?= form_open_multipart(
+				'Gudang/cPermintaan/bayar/' . $value->id_permintaan
+			) ?>
+
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<h5 class="modal-title">
+						Upload Bukti Pembayaran
+					</h5>
+
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
+
+				<div class="modal-body">
+
+					<p>
+						Total pembayaran:
+						<strong>
+							Rp <?= number_format(
+									$value->total_bayar,
+									0,
+									',',
+									'.'
+								) ?>
+						</strong>
+					</p>
+
+					<div class="mb-3">
+						<label class="form-label">
+							Bukti Pembayaran
+						</label>
+
+						<input class="form-control" type="file" name="gambar" accept="image/*" required>
+					</div>
+
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						Batal
+					</button>
+
+					<button type="submit" class="btn btn-primary">
+						Upload Pembayaran
+					</button>
+				</div>
+
 			</div>
-	<?php
-		}
-	}
-	?>
+
+			</form>
+		</div>
+	</div>
+
+<?php endforeach; ?>

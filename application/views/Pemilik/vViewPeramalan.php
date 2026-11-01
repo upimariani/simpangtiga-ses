@@ -26,7 +26,7 @@
 							$ft = round((0.2 * $dt->dt_permintaan) + ((1 - 0.2) * $dt->dt_peramalan));
 
 							//mengambil data bulan
-							$bulan = $this->db->query("SELECT MAX(bulan)+1 as bulan FROM `peramalan` WHERE id_produk='1' AND tahun='2025'")->row();
+							$bulan = $this->db->query("SELECT MAX(bulan)+1 as bulan FROM `peramalan` WHERE id_produk='" . $id_produk . "' AND tahun='2026'")->row();
 							if ($bulan->bulan == '13') {
 								$next_bulan = 'Januari';
 							}
@@ -60,7 +60,8 @@
 							<table id="myTable" class="table">
 								<thead class="text-center text-xs font-weight-bold mb-0">
 									<tr>
-										<th class="d-none d-md-table-cell">Nama Barang</th>
+										<!-- <th class="d-none d-md-table-cell">Nama Barang</th> -->
+										<th class="d-none d-md-table-cell">No</th>
 										<th class="d-none d-md-table-cell">Bulan</th>
 										<th class="d-none d-md-table-cell">Tahun</th>
 										<th class="d-none d-md-table-cell">Total Transaksi</th>
@@ -76,9 +77,11 @@
 									<?php
 									$mape = 0;
 									$tpers = 0;
+									$no = 1;
 									foreach ($view_analisis as $key => $value) { ?>
 										<tr>
-											<td class="d-none d-md-table-cell"><?= $value->nama_produk ?></td>
+											<td class="d-none d-md-table-cell"><?= $no++ ?></td>
+											<!-- <td class="d-none d-md-table-cell"><?= $value->nama_produk ?></td> -->
 											<td class="d-none d-md-table-cell"><?php
 																				if ($value->bulan == '1') {
 																					echo 'Januari';
@@ -110,7 +113,7 @@
 											<?php
 											$t_tranbulan = $this->db->query("SELECT COUNT(permintaan.id_permintaan) as jml_permintaan, tgl_permintaan FROM `permintaan` JOIN detail_permintaan ON permintaan.id_permintaan=detail_permintaan.id_permintaan WHERE detail_permintaan.id_produk='1' AND MONTH(tgl_permintaan) = '" . $value->bulan . "' AND YEAR(tgl_permintaan)='" . $value->tahun . "'")->row();
 											?>
-											<td><?= $t_tranbulan->jml_permintaan ?></td>
+											<td><?= $t_tranbulan->jml_permintaan ?>x</td>
 											<td class="d-none d-md-table-cell"><?= $value->dt_permintaan ?> <?= $value->keterangan ?></td>
 											<?php
 											$tpers += $value->dt_permintaan;
@@ -125,20 +128,44 @@
 											?>
 											<?php
 											$selisih =  $value->dt_permintaan - $value->dt_peramalan;
-											$absolute = ($selisih / $value->dt_permintaan) * 100;
+											$absolute = abs(($selisih / $value->dt_permintaan) * 100);
 											$mape += $absolute;
 											?>
 											<td><?= abs($selisih) ?></td>
 											<?php
 											$sel = round($absolute, 2);
 											?>
-											<td><?= abs($sel)  ?></td>
+											<td><?= $sel  ?></td>
 										</tr>
 									<?php } ?>
 								<tfoot>
 									<?php
-									$t_tran = $this->db->query("SELECT COUNT(permintaan.id_permintaan) as jml_permintaan FROM `permintaan` JOIN detail_permintaan ON permintaan.id_permintaan=detail_permintaan.id_permintaan WHERE detail_permintaan.id_produk='" . $id_produk . "'")->row();
+									$t_tran = $this->db->query("
+    SELECT COUNT(DISTINCT permintaan.id_permintaan) AS jml_permintaan
+    FROM permintaan
+    JOIN detail_permintaan
+        ON permintaan.id_permintaan = detail_permintaan.id_permintaan
+    WHERE detail_permintaan.id_produk = ?
+", [$id_produk])->row();
+
+									$bulan = $this->db->query("
+    SELECT COUNT(DISTINCT MONTH(permintaan.tgl_permintaan)) AS jumlah_bulan
+    FROM permintaan
+    JOIN detail_permintaan
+        ON permintaan.id_permintaan = detail_permintaan.id_permintaan
+    WHERE detail_permintaan.id_produk = ?
+      AND YEAR(permintaan.tgl_permintaan) = 2026
+", [$id_produk])->row();
+
+									// Jumlah periode yang dapat dievaluasi
+									$jumlah_periode = max(0, (int) $bulan->jumlah_bulan - 1);
+
+									// MAPE = total APE / jumlah periode
+									$nilai_mape = ($jumlah_periode > 0)
+										? round(abs($mape) / $jumlah_periode, 2)
+										: 0;
 									?>
+
 									<tr>
 										<td></td>
 										<td><strong>Total Transaksi</strong></td>
@@ -147,7 +174,7 @@
 										<td><?= $tpers ?></td>
 										<td></td>
 										<td><strong>MAPE</strong></td>
-										<td><?= abs(round($mape / $t_tran->jml_permintaan + 1, 2)) ?>%</td>
+										<td><?= number_format($nilai_mape, 2, ',', '.') ?>%</td>
 									</tr>
 								</tfoot>
 

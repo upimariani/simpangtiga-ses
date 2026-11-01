@@ -16,10 +16,10 @@ class cPeramalan extends CI_Controller
 		$data = array(
 			'produk' => $this->mProduk->select()
 		);
-		$this->load->view('Admin/Layout/head');
-		$this->load->view('Admin/Layout/aside');
-		$this->load->view('Admin/vPeramalan', $data);
-		$this->load->view('Admin/Layout/footer');
+		$this->load->view('Pemilik/Layout/head');
+		$this->load->view('Pemilik/Layout/aside');
+		$this->load->view('Pemilik/vPeramalan', $data);
+		$this->load->view('Pemilik/Layout/footer');
 	}
 	public function view_peramalan($id_produk)
 	{
@@ -71,10 +71,10 @@ class cPeramalan extends CI_Controller
 			'periode' => $this->mPeramalan->periode(),
 			'id_produk' => $id_produk
 		);
-		$this->load->view('Admin/Layout/head');
-		$this->load->view('Admin/Layout/aside');
-		$this->load->view('Admin/vViewPeramalan', $data);
-		$this->load->view('Admin/Layout/footer');
+		$this->load->view('Pemilik/Layout/head');
+		$this->load->view('Pemilik/Layout/aside');
+		$this->load->view('Pemilik/vViewPeramalan', $data);
+		$this->load->view('Pemilik/Layout/footer');
 	}
 }
 

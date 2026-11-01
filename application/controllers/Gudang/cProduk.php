@@ -86,10 +86,10 @@ class cProduk extends CI_Controller
 					'supplier' => $this->mUser->select(),
 					'produk' => $this->mProduk->get_data($id)
 				);
-				$this->load->view('Admin/Layout/head');
-				$this->load->view('Admin/Layout/aside');
-				$this->load->view('Admin/Produk/vEditProduk', $data);
-				$this->load->view('Admin/Layout/footer');
+				$this->load->view('Gudang/Layout/head');
+				$this->load->view('Gudang/Layout/aside');
+				$this->load->view('Gudang/Produk/vEditProduk', $data);
+				$this->load->view('Gudang/Layout/footer');
 			} else {
 				$upload_data = $this->upload->data();
 				$data = array(
@@ -102,7 +102,7 @@ class cProduk extends CI_Controller
 				);
 				$this->mProduk->update($id, $data);
 				$this->session->set_flashdata('success', 'Data Produk Berhasil Diperbaharui!');
-				redirect('Admin/cProduk');
+				redirect('Gudang/cProduk');
 			} //tanpa ganti gambar
 			$upload_data = $this->upload->data();
 			$data = array(
@@ -114,22 +114,22 @@ class cProduk extends CI_Controller
 			);
 			$this->mProduk->update($id, $data);
 			$this->session->set_flashdata('success', 'Data Produk Berhasil Diperbaharui!');
-			redirect('Admin/cProduk');
+			redirect('Gudang/cProduk');
 		}
 		$data = array(
 			'supplier' => $this->mUser->select(),
 			'produk' => $this->mProduk->get_data($id)
 		);
-		$this->load->view('Admin/Layout/head');
-		$this->load->view('Admin/Layout/aside');
-		$this->load->view('Admin/Produk/vEditProduk', $data);
-		$this->load->view('Admin/Layout/footer');
+		$this->load->view('Gudang/Layout/head');
+		$this->load->view('Gudang/Layout/aside');
+		$this->load->view('Gudang/Produk/vEditProduk', $data);
+		$this->load->view('Gudang/Layout/footer');
 	}
 	public function delete($id)
 	{
 		$this->mProduk->delete($id);
 		$this->session->set_flashdata('success', 'Data Produk Berhasil Dihapus!');
-		redirect('Admin/cProduk');
+		redirect('Gudang/cProduk');
 	}
 }
 
